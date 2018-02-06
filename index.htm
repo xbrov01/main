@@ -1,0 +1,226 @@
+<html>
+    <head>
+        <meta charset="UTF-8"> 
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    </head>
+<body>
+
+<script>
+
+function sortAll(dict) {
+    // Create items array
+    var items = Object.keys(dict).map(function(key) {
+        return [key, dict[key]];
+    });
+
+    // Sort the array based on the second element
+    items.sort(function(first, second) {
+        return second[1] - first[1];
+    });
+
+    var newDict = {};
+    for (var i = 0; i < items.length; i++) {
+        newDict[items[i][0]] = items[i][1];
+    }
+
+    return newDict;
+} 
+
+function countAll(txt) {
+    var counts = {};
+    var letter = "";
+    for (var i = 0; i < txt.length; i++) {
+        letter = txt.substring(i, i + 1);
+        if (letter === " ") {
+            continue;
+        }
+        if ($.inArray(letter, Object.keys(counts)) >= 0) {
+            counts[letter]++;
+        } else {
+            counts[letter] = 1;
+        }
+    }
+    if (Object.keys(counts).length > (MARKS - MARKS_START)) {
+        alert("Chyba: počet je příliš nízký, neporkyje všechna písmena ve zprávě!");
+    }
+    return counts;
+}
+
+function printAll(dict) {
+    var x = "";
+    Object.keys(dict).forEach(function(key) {
+        x += "<div><span class='key'>" + key + "</span> = <span class='keyValue'>" + dict[key] + "</span></div>";
+    });
+    $("#cipherKey").html(x);
+    return x;    
+}
+
+function norm(str) {
+    if (str.toString().length == 1) {
+        return "&nbsp;" + str.toString();
+    } else {
+        return str.toString();
+    }
+}
+
+function printEncrypted(cipherDict, txt) {
+    var message = [];
+    for (var i = 0; i < txt.length; i++) {
+        letter = txt.substring(i, i + 1);
+        if (letter === " ") {
+            continue;
+        }
+        var numbers = cipherDict[letter];
+        message.push(getRandomItem(numbers));
+    }
+    var out = "";
+    var charArr = characters(cipherDict);
+    message.forEach(function (v) {
+        out += "<div class='output'>" + norm(v) + " - " + charArr[v] + "</div>";
+    })
+    $("#cipher").html(out);
+}
+
+function getRandomIndex(arr) {
+    return Math.floor(Math.random() * (arr.length - 1));
+}
+
+function getRandomItem(arr) {
+    return arr[getRandomIndex(arr)];
+}
+
+function removeRandomItem(arr) {
+    return arr.splice(getRandomIndex(arr), 1)[0];
+}
+
+function doAssign(dict, letter, randomItem) {
+    if ($.inArray(letter, Object.keys(dict)) == -1) {
+        dict[letter] = [];
+    }
+    dict[letter].push(randomItem);
+}
+
+function assign(sortedDict) {
+    var slots = [];
+    for (var i = MARKS_START; i < MARKS_START + MARKS; i++) {
+        slots.push(i);
+    }
+
+    var assigned = {};
+    var cycle = 0;
+    var letters = Object.keys(sortedDict);
+    for (var i = MARKS_START; i < MARKS_START + MARKS; i++) {
+        var randomItem = removeRandomItem(slots);
+        if (cycle++ > letters.length) {
+            cycle = 0;
+        }
+        var letter = letters[cycle];
+        if (sortedDict[letter] > 0) {
+            doAssign(assigned, letters[cycle], randomItem);
+            sortedDict[letter]--;
+        }
+    }
+    return assigned;
+}
+
+function resetAlphabetArray() {
+    var alphabet = 'abcdehijklmnoprstuvyz';
+    var alphabetArray = [];
+    var map = {};
+    for (var i = 0; i < alphabet.length; i++) {
+        var letter = alphabet.substring(i, i + 1);
+        alphabetArray.push(letter);
+    }
+    return alphabetArray;
+}
+
+function characters(assignedDict) {
+    var charArray = {};
+    Object.keys(assignedDict).forEach(function (letter) {
+        var numbers = assignedDict[letter];
+        var alpha = resetAlphabetArray();
+        numbers.forEach(function (number) {
+            var otherLetter = removeRandomItem(alpha);
+            while (otherLetter === letter) {
+                otherLetter = removeRandomItem(alpha);
+            }
+            if (Math.random() > 0.5) {
+                charArray[number] = "<span class='letter'>" + letter + "</span><span class='otherLetter'>" + otherLetter + "</span>";
+            } else {
+                charArray[number] = "<span class='otherLetter'>" + otherLetter + "</span><span class='letter'>" + letter + "</span>";
+            }
+        })
+    })
+    return charArray;
+}
+
+function doAll() {
+    var txt = $("#in").text()
+    MARKS_START = parseInt($("#start").val());
+    MARKS = parseInt($("#count").val());
+    var cipherDict = assign(sortAll(countAll(txt)));
+    printAll(cipherDict);
+    printEncrypted(cipherDict, txt);
+}
+
+var MARKS_START;
+var MARKS;
+
+$(document).ready ( function () {
+	$("#btn").on( "click", function ( event ) {
+        doAll();
+  })
+});</script>
+
+<style>
+        textarea {
+            width: 50%;
+        }
+        .letter {
+            color: red;
+        }
+        .output {
+            text-transform: uppercase;
+        }
+        #extra, #cipher, #cipherKey {
+            font-family: monospace;
+        }
+        #cipherParent, #cipherKeyParent {
+            float: left;
+            width: 50%;
+        }
+        .key {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .keyValue {
+            text-transform: uppercase;
+        }
+</style>
+        
+<div>
+    <textarea id="in">testovaci zprava prilis zlutoucky kun upel dabelske ody</textarea>
+</div>
+<div>
+    <div>Start:</div>
+    <div><input id="start" type="text" value="1" /></div>
+</div>
+<div>
+    <div>Počet:</div>
+    <div><input id="count" type="text" value="48" /></div>
+</div>
+<div>
+    <div><button id="btn">Šifruj</button></div>
+</div>
+
+<div id="cipherKeyParent">
+    <div>Klíč</div>
+    <div id="cipherKey"></div>
+</div>
+<div id="cipherParent">
+    <div>Šifra</div>
+    <div id="cipher"></div>
+</div>
+
+</body>
+</html>
