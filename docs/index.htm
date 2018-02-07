@@ -65,13 +65,22 @@ function norm(str) {
 
 function printEncrypted(cipherDict, txt) {
     var message = [];
+    var clone = $.extend(true, {}, cipherDict);
     for (var i = 0; i < txt.length; i++) {
         letter = txt.substring(i, i + 1);
         if (letter === " ") {
             continue;
         }
-        var numbers = cipherDict[letter];
-        message.push(getRandomItem(numbers));
+        var numbers = clone[letter];
+        var item = numbers.splice(0, 1)[0];
+        if (item === undefined) {
+            // reset
+            clone[letter] = $.extend(true, [], cipherDict[letter]);
+            numbers = clone[letter];
+            item = numbers.splice(0, 1)[0];
+        }
+
+        message.push(item);
     }
     var out = "";
     var charArr = characters(cipherDict);
@@ -82,15 +91,29 @@ function printEncrypted(cipherDict, txt) {
 }
 
 function getRandomIndex(arr) {
-    return Math.floor(Math.random() * (arr.length - 1));
+    if (arr.length === 0) {
+        return -1;
+    } else {
+        return Math.floor(Math.random() * (arr.length - 1));
+    }
 }
 
 function getRandomItem(arr) {
-    return arr[getRandomIndex(arr)];
+    var index = getRandomIndex(arr);
+    if (index === -1) {
+        return undefined;
+    } else {
+        return arr[getRandomIndex(arr)];
+    }
 }
 
 function removeRandomItem(arr) {
-    return arr.splice(getRandomIndex(arr), 1)[0];
+    var index = getRandomIndex(arr);
+    if (index === -1) {
+        return undefined;
+    } else {
+        return arr.splice(index, 1)[0];
+    }
 }
 
 function doAssign(dict, letter, randomItem) {
@@ -111,7 +134,7 @@ function assign(sortedDict) {
     var letters = Object.keys(sortedDict);
     for (var i = MARKS_START; i < MARKS_START + MARKS; i++) {
         var randomItem = removeRandomItem(slots);
-        if (cycle++ > letters.length) {
+        if (cycle > letters.length) {
             cycle = 0;
         }
         var letter = letters[cycle];
@@ -119,6 +142,7 @@ function assign(sortedDict) {
             doAssign(assigned, letters[cycle], randomItem);
             sortedDict[letter]--;
         }
+        cycle++;
     }
     return assigned;
 }
@@ -159,8 +183,8 @@ function doAll() {
     MARKS_START = parseInt($("#start").val());
     MARKS = parseInt($("#count").val());
     var cipherDict = assign(sortAll(countAll(txt)));
-    printAll(cipherDict);
     printEncrypted(cipherDict, txt);
+    printAll(cipherDict);
 }
 
 var MARKS_START;
