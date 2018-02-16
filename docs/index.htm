@@ -212,10 +212,27 @@ var MARKS_START;
 var MARKS;
 
 $(document).ready ( function () {
+    $("#in").text(getUrlParameter("text"));
+    doAll();
 	$("#btn").on( "click", function ( event ) {
         doAll();
   })
-});</script>
+});
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};</script>
 
 <style>
         textarea {
@@ -244,7 +261,7 @@ $(document).ready ( function () {
 </style>
         
 <div>
-    <textarea id="in">testovaci zprava prilis zlutoucky kun upel dabelske ody</textarea>
+    <textarea id="in"></textarea>
 </div>
 <div>
     <div>Start:</div>
