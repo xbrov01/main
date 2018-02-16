@@ -179,7 +179,7 @@ function characters(assignedDict) {
 }
 
 function doAll() {
-    var txt = $("#in").text()
+    var txt = $("#in").val()
     MARKS_START = parseInt($("#start").val());
     MARKS = parseInt($("#count").val());
     var cipherDict = assign(sortAll(countAll(txt)));
