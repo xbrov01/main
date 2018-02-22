@@ -155,21 +155,22 @@ function assign(sortedDict) {
     var letters = Object.keys(sortedDict);
     for (var i = MARKS_START; i < MARKS_START + MARKS; i++) {
         var randomItem = removeRandomItem(slots);
-        if (cycle > letters.length) {
+        if (cycle >= letters.length) {
             cycle = 0;
         }
         var letter = letters[cycle];
-        if (sortedDict[letter] > 0) {
-            doAssign(assigned, letters[cycle], randomItem);
-            sortedDict[letter]--;
-        }
+        doAssign(assigned, letters[cycle], randomItem);
+        // if (sortedDict[letter] > 0) {
+        //     doAssign(assigned, letters[cycle], randomItem);
+        //     sortedDict[letter]--;
+        // }
         cycle++;
     }
     return assigned;
 }
 
 function resetAlphabetArray() {
-    var alphabet = 'abcdehijklmnoprstuvyz';
+    var alphabet = 'bcdfghjklmnpqrstvwxz';
     var alphabetArray = [];
     var map = {};
     for (var i = 0; i < alphabet.length; i++) {
@@ -200,7 +201,7 @@ function characters(assignedDict) {
 }
 
 function doAll() {
-    var txt = $("#in").val()
+    var txt = $("#in").val().replace(" ", "");
     MARKS_START = parseInt($("#start").val());
     MARKS = parseInt($("#count").val());
     var cipherDict = assign(sortAll(countAll(txt)));
@@ -242,16 +243,30 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
         .letter {
             color: red;
+            text-decoration: underline;
         }
         .output {
             text-transform: uppercase;
         }
-        #extra, #cipher, #cipherKey, #cipherKeyNum {
+        #cipherKey {
+            font-family: monospace;
+            column-count: 1;
+        }
+        #cipherKeyNum {
+            font-family: monospace;
+            column-count: 2;
+        }
+        #cipher {
+            column-count: 3;
             font-family: monospace;
         }
-        #cipherParent, #cipherKeyParent {
+        #cipherParent {
             float: left;
-            width: 20%;
+            width: 50%;
+        }
+        #cipherKeyParentNum, #cipherKeyParent {
+            float: left;
+            width: 25%;
         }
         .key {
             font-weight: bold;
@@ -260,26 +275,37 @@ var getUrlParameter = function getUrlParameter(sParam) {
         .keyValue {
             text-transform: uppercase;
         }
+        #controls > div, #controls > div > div {
+            display: inline;
+        }
+        #controls {
+            width: 100%;
+            text-align: center;
+        }
 </style>
         
 <div>
     <textarea id="in"></textarea>
 </div>
-<div>
-    <div>Start:</div>
-    <div><input id="start" type="text" value="1" /></div>
-</div>
-<div>
-    <div>Počet:</div>
-    <div><input id="count" type="text" value="48" /></div>
-</div>
-<div>
-    <div><button id="btn">Šifruj</button></div>
+<div id="controls">
+    <div>
+        <div>Start:</div>
+        <div><input id="start" type="text" value="1" /></div>
+    </div>
+    <div>
+        <div>Počet:</div>
+        <div><input id="count" type="text" value="48" /></div>
+    </div>
+    <div>
+        <div><button id="btn">Šifruj</button></div>
+    </div>
 </div>
 
 <div id="cipherKeyParent">
     <div>Klíč</div>
     <div id="cipherKey"></div>
+</div>    
+<div id="cipherKeyParentNum">
     <div>Klíč - čísla</div>
     <div id="cipherKeyNum"></div>
 </div>
